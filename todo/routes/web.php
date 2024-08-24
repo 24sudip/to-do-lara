@@ -23,3 +23,4 @@ Route::prefix('auth')->group(function () {
     Route::post('/logout', LogoutController::class);
     Route::post('/register', RegisterController::class)->middleware('guest');
 });
+

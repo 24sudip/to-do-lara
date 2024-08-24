@@ -1,18 +1,6 @@
 import { ref, reactive, computed } from "vue";
 import { defineStore } from "pinia";
-import { allTask } from "@/http/task-api";
-
-const tmp = {
-  state: () => ({
-    
-  }),
-  getters: {
-    
-  },
-  actions: {
-    
-  },
-};
+import { allTask, createTask, updateTask, completeTask, removeTask } from "@/http/task-api";
 
 export const useTaskStore = defineStore("taskStore", () => {
     const tasks = ref([]);
@@ -20,14 +8,44 @@ export const useTaskStore = defineStore("taskStore", () => {
     const uncompletedTask = computed(() =>
       tasks.value.filter((task) => !task.is_completed)
     );
+
     const completedTask = computed(() =>
       tasks.value.filter((task) => task.is_completed)
     );
+
     const fetchAllTask = async () => {
       const { data } = await allTask();
       tasks.value = data.data;
     };
+
+    const handleAddedTask = async (newTask) => {
+      const { data: createdTask } = await createTask(newTask);
+      tasks.value.unshift(createdTask.data);
+    };
+
+    const handleUpdatedTask = async (task) => {
+      const { data: updatedTask } = await updateTask(task.id, {
+        name: task.name,
+      });
+      const currentTask = tasks.value.find((item) => item.id === task.id);
+      currentTask.name = updatedTask.data.name;
+    };
+
+    const handleCompletedTask = async (task) => {
+      const { data: updatedTask } = await completeTask(task.id, {
+        is_completed: task.is_completed,
+      });
+      const currentTask = tasks.value.find((item) => item.id === task.id);
+      currentTask.is_completed = updatedTask.data.is_completed;
+    };
+
+    const handleRemovedTask = async (task) => {
+      await removeTask(task.id);
+      const index = tasks.value.findIndex((item) => item.id === task.id);
+      tasks.value.splice(index, 1);
+    };
+
     return {
-        tasks, completedTask, uncompletedTask, fetchAllTask
+      tasks, completedTask, uncompletedTask, fetchAllTask, handleAddedTask, handleUpdatedTask, handleCompletedTask, handleRemovedTask
     }
 });

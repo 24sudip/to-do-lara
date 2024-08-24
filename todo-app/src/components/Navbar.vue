@@ -10,26 +10,51 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
+                <ul class="navbar-nav" v-if="store.isLoggedIn">
                     <li class="nav-item">
-                        <a href="my-tasks.html" class="nav-link">Tasks</a>
+                        <!-- <router-link :to="{ name: 'tasks' }" class="nav-link">Tasks</router-link> -->
+                         <a href="#" @click.prevent="$router.push('/tasks')" class="nav-link">Tasks</a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">Summary</a>
+                        <router-link :to="{ name: 'summary' }" class="nav-link">Summary</router-link>
                     </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a href="#" class="btn btn-outline-secondary ms-2">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="btn btn-danger ms-2">Register</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="btn btn-outline-secondary ms-2">Logout</a>
-                    </li>
+                    <template v-if="!store.isLoggedIn">
+                        <li class="nav-item">
+                            <router-link :to="{ name: 'login' }" class="btn btn-outline-secondary ms-2">Login</router-link>
+                        </li>
+                        <li class="nav-item">
+                            <router-link :to="{ name: 'register' }" class="btn btn-danger ms-2">Register</router-link>
+                        </li>
+                    </template>
+                    <template v-else>
+                        <li class="nav-item">
+                            <a href="#" class="btn btn-outline-secondary ms-2" @click.prevent="log_out">Logout</a>
+                        </li>
+                    </template>
                 </ul>
             </div>
         </div>
     </nav>
 </template>
+
+<script setup>
+    import { useRouter } from 'vue-router';
+    import { useAuthStore } from '@/stores/auth';
+
+    const router = useRouter();
+    const store = useAuthStore();
+
+    const log_out = async () => {
+        await store.handleLogout();
+        router.push({ name: 'login' });
+    }
+</script>
+
+<style scoped>
+    .nav-link.router-link-active {
+    color: var(--bs-navbar-active-color);
+    font-weight: 700;
+}
+</style>
